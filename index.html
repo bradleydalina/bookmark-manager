@@ -329,6 +329,11 @@
   const supabase = createClient(supabaseUrl, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1dXBrcWV3eGF4ZHdlcGFzdWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTg3NjM1ODksImV4cCI6MjAzNDMzOTU4OX0.icXtvncapWLxHYdVz94aaefetE73vNmBnJqBabDLOhU')
 
   console.log('Supabase Instance: ', supabase)
+
+  const { data, error } = await supabase
+  .from('record_tbl')
+  .select()
+  console.log(data);	
 </script>	
 
 </body>
