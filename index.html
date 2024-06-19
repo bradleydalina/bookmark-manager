@@ -5,60 +5,105 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<title>Bookmark Manager</title>
 	<style>
-    @import url("//cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css");
-    @import url("//cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css");
-    @import url("https://fonts.googleapis.com/css?family=Raleway:300,300italic,500,500italic");
-    * {
-      margin: 0;
-      padding: 0;
-      font-family:Raleway,Helvetica,sans-serif;font-size:18pt;font-weight:300;line-height:1.75;letter-spacing:.025em;
-      box-sizing: border-box;
-      font-size: 14px;
-      }
-    body {
-      -webkit-font-smoothing: antialiased;
-      -webkit-text-size-adjust: none;
-      width: 100% !important;
-      height: 100% !important;
-      line-height: 1.6;
-      background-color: #f6f6f6;
-      }
-     #main, #main > tr, #main > tr > td{height:100%; width:100%; position:absolute;}
-     .dashboard{
-        display: flex !important;
-        max-width: 1270px !important;
-        clear: both !important;
-        flex-direction:column;
-        height:calc(100% - 60px);
-        width:calc(100% - 60px);
-        margin:30px;
-        }
-     .container {
-        display: flex !important;
-        align-items:start;
-        justify-contents:center;
-        }
-		 .main {
-          margin:auto;
-          padding:0;
-          top:0;
-          bottom:0;
-          left:0;
-          right:0;
-          position:absolute;
-          display:block;
-          height:calc(100% - 60px);
-          width:calc(100% - 60px);
-          justify-contents:space-between;
-      }
-      h1,
-      h2,
-      h3 {color: #000;margin: 40px 0 0;line-height: 1.2;font-weight: 300;}
-      h1 {font-size: 32px;font-weight: 500;}
-      h2 {font-size: 24px;}
-      h3 {font-size: 18px;}
-      h4 {font-size: 14px;font-weight: 600;}
-      .text-bold{font-weight:bold;}
+	    @import url("//cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css");
+	    @import url("//cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css");
+	    @import url("https://fonts.googleapis.com/css?family=Raleway:300,300italic,500,500italic");
+	    * {
+	      margin: 0;
+	      padding: 0;
+	      font-family:Raleway,Helvetica,sans-serif;font-size:18pt;font-weight:300;line-height:1.75;letter-spacing:.025em;
+	      box-sizing: border-box;
+	      font-size: 14px;
+	      }
+	    body {
+	      -webkit-font-smoothing: antialiased;
+	      -webkit-text-size-adjust: none;
+	      width: 100% !important;
+	      height: 100% !important;
+	      line-height: 1.6;
+	      background-color: #f6f6f6;
+	      }
+	     #main, #main > tr, #main > tr > td{height:100%; width:100%; position:absolute; }
+	     .dashboard{
+	        display: flex !important;
+	        max-width: 1270px !important;
+	        clear: both !important;
+	        flex-direction:column;
+	        height:calc(100% - 60px);
+	        width:calc(100% - 60px);
+	        margin:30px;
+	        }
+	     .container {
+	        display: flex !important;
+	        align-items:start;
+	        justify-contents:center;
+	        }
+	      h1,
+	      h2,
+	      h3 {color: #000; margin: 40px 0 0;line-height: 1.2;font-weight: 400;}
+	      h1 {font-size: 32px;font-weight: 500;}
+	      h2 {font-size: 24px;}
+	      h3 {font-size: 18px;}
+	      h4 {font-size: 14px;font-weight: 600;}
+	      textarea, select, input[type='text'], input[type='search'], input[type='password'], input[type='file'], input[type='email'], input[type='number']{
+	        line-height:32px;
+	        padding:2px 5px !important;
+	        height:32px;
+	        border-radius:0px !important;
+	        outline:0;
+	      }
+		.spinner {
+		margin: 10px auto;
+		width: 50px;
+		height: 30px;
+		text-align: center;
+		font-size: 10px;
+		}
+		
+		.spinner > div {
+		background-color: #333;
+		height: 100%;
+		width: 6px;
+		display: inline-block;
+		
+		-webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+		animation: sk-stretchdelay 1.2s infinite ease-in-out;
+		}
+		
+		.spinner .rect2 {
+		-webkit-animation-delay: -1.1s;
+		animation-delay: -1.1s;
+		}
+		
+		.spinner .rect3 {
+		-webkit-animation-delay: -1.0s;
+		animation-delay: -1.0s;
+		}
+		
+		.spinner .rect4 {
+		-webkit-animation-delay: -0.9s;
+		animation-delay: -0.9s;
+		}
+		
+		.spinner .rect5 {
+		-webkit-animation-delay: -0.8s;
+		animation-delay: -0.8s;
+		}
+		
+		@-webkit-keyframes sk-stretchdelay {
+		0%, 40%, 100% { -webkit-transform: scaleY(0.4) }
+		20% { -webkit-transform: scaleY(1.0) }
+		}
+		
+		@keyframes sk-stretchdelay {
+		0%, 40%, 100% {
+		transform: scaleY(0.4);
+		-webkit-transform: scaleY(0.4);
+		} 20% {
+		transform: scaleY(1.0);
+		-webkit-transform: scaleY(1.0);
+		}
+		}
 	</style>
   <link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.css" />
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"
@@ -84,15 +129,27 @@
                 <table id="record_tbl" class="table table-condensed table-striped table-hover display" style="width:100%">
                   <thead>
                     <tr>
-                      <th>Name</th>
-                      <th>Position</th>
-                      <th>Office</th>
-                      <th>Age</th>
-                      <th>Start date</th>
-                      <th>Salary</th>
+                      <th>Title</th>
+                      <th>Link</th>
+                      <th>Category</th>
+                      <th>Priority</th>
+                      <th>Created</th>
+                      <th>Action</th>
                     </tr>
                   </thead>
                   <tbody>
+                    <tr>
+                    <td colspan="6" style="text-align:center;">
+					              Please wait ...
+                      <div class="spinner">
+                        <div class="rect1"></div>
+                        <div class="rect2"></div>
+                        <div class="rect3"></div>
+                        <div class="rect4"></div>
+                        <div class="rect5"></div>
+                      </div>
+                    </td>
+                    </tr>
                   </tbody>
                 </table>
               </main>
@@ -118,22 +175,25 @@
 	const recordTable = $('#record_tbl').DataTable({
         "searching": true,
         "aoColumnDefs": [
-        //{ "bSortable": false, "aTargets": [ 0, 1, 4] },
-        ],
+          { "bSortable": false, "aTargets": [ 1, 5] },
+        ], 
         data: [],
         "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
-        //"order": [[ 4, "desc" ]],
+        "order": [[ 2, "asc" ], [3, "desc"]],
         "autoWidth": true,
-		    "responsive": true,
-        /*columns:[
-        { data: 'rank_name', className: 'dt-expand'},
-        { data: 'merge_unit' ,className: 'dt-expand'},
-        { data: 'role_name' ,className: 'dt-expand'},
-        { data: 'email' ,className: 'dt-expand'},
-        { data: 'mobile',className: 'dt-expand'},
-        { data: 'status_label',className: 'dt-expand'},
+		    "responsive": true, 
+        columns:[
+        { data: 'title', className: 'dt-expand'},
+        { data: 'link' ,className: 'dt-expand'},
+        { data: 'category' ,className: 'dt-expand'},
+        { data: 'created_at' ,className: 'dt-expand'},
+	    	{ data: 'priority' ,className: 'dt-expand'},
         { data: 'action'},
-        ],*/
+        ],
+        drawCallback: function (settings) {
+			    $(".dt-search").append(" <select id='category-filter' class='dt-input'><option>Select...</option></select>");
+		      $(".dt-search").append(" <select id='priority-filter' class='dt-input'><option>Select...</option></select>");
+          }
     });
 	});
   </script>
