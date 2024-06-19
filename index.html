@@ -323,6 +323,13 @@
 			</tr>
 		</tbody>
 	</table>
-</body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+	import { createClient } from '@supabase/supabase-js'
 
+	const supabaseUrl = 'https://zuupkqewxaxdwepasuai.supabase.co'
+	const supabaseKey = process.env.SUPABASE_KEY
+	const supabase = createClient(supabaseUrl, supabaseKey)
+</script>	
+</body>
 </html>
