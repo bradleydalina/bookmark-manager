@@ -323,13 +323,13 @@
 			</tr>
 		</tbody>
 	</table>
-<script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script type="module">
-	const supabaseUrl = 'https://zuupkqewxaxdwepasuai.supabase.co'
-	const supabaseKey = process.env.SUPABASE_KEY
-	const { createClient } = supabase
-	const supabase = createClient(supabaseUrl, supabaseKey)
-  	console.log('Supabase Instance: ', _supabase)
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
+  const supabaseUrl = 'https://zuupkqewxaxdwepasuai.supabase.co'
+  const supabase = createClient(supabaseUrl, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1dXBrcWV3eGF4ZHdlcGFzdWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTg3NjM1ODksImV4cCI6MjAzNDMzOTU4OX0.icXtvncapWLxHYdVz94aaefetE73vNmBnJqBabDLOhU')
+
+  console.log('Supabase Instance: ', supabase)
 </script>	
+
 </body>
 </html>
