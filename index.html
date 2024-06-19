@@ -325,11 +325,11 @@
 	</table>
 <script type="module" src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script type="module">
-	const createClient = require('@supabase/supabase-js');
-
 	const supabaseUrl = 'https://zuupkqewxaxdwepasuai.supabase.co'
 	const supabaseKey = process.env.SUPABASE_KEY
+	const { createClient } = supabase
 	const supabase = createClient(supabaseUrl, supabaseKey)
+  	console.log('Supabase Instance: ', _supabase)
 </script>	
 </body>
 </html>
