@@ -268,7 +268,7 @@
           <div class="mb-3">
             <label for="category" class="form-label">Category <span class="category-error text-danger fst-italic"></span></label>
             <select class="form-control" id="category" required>
-            <option value="">Select</option>
+            <option value="select">Select</option>
 			      <option value="add-new">Add new</option>
             </select>
 			      <input type="text" class="form-control" id="category-new" placeholder="Category" style="display:none;">
@@ -319,6 +319,7 @@
       
       var record_data = [];
       var categories_data= [];
+	    var recordTable;
 
       async function fetchCategories(table) {
           try{
@@ -362,23 +363,63 @@
 
       async function addRecord(data){
           try {
-              let { error, statusText } = await supabase
+              let { error } = await supabase
               .from('record_tbl')
               .insert(data);
-              if(error) throw error;
+              
               $("#new-record-modal-title").text("New bookmark record saved").css({"color":"#ff0000"});
               
-              reDrawRecordTable(await fetchAndDrawRecordTable());
-              
+					    record_data = [];
+					    categories_data= [];
+			        $('#record_tbl').DataTable().clear().destroy();
+              await reBuild();
+			        if(error) throw error;
               setTimeout(function(){
-              $("#new-record-close").trigger('click');
+                  $("#new-record-close").trigger('click');
               }, 3000);
+
+			        
           } catch (error) {
               $("#new-record-modal-title").text("Error saving the new record").css({"color":"#ff0000"});
               $("#new-record-modal-message").text(JSON.stringify(error));
               return false;
           }
       }
+    $(document).ready( function () {
+      $("#new-record-save").on("click", function(e){
+          e.preventDefault();
+          let is_validated = validateForm('#new-record-modal');
+          if(is_validated){
+              if(!['select', 'add-new', 'late'].includes($("#category").val())){
+                  let data = {title: $("#title").val(),
+                  link: $("#link").val(),
+                  category_id: $("#category").val(),
+                  priority: $("#priority").val(),
+                  username: $("#username").val(),
+                  password: $("#password").val()
+                  };
+                  addRecord(data);
+              }else{
+                  let category_title = $("#category option:selected").text().toLowerCase();
+                  addCategory(category_title).then(function(category){
+                      let data = {title: $("#title").val(),
+                      link: $("#link").val(),
+                      category_id: category.id,
+                      priority: $("#priority").val(),
+                      username: $("#username").val(),
+                      password: $("#password").val()
+                      };
+                      addRecord(data);
+                  });
+              }
+          }else{
+          $("#new-record-modal-title").text("Form Validation Error").css({"color":"#ff0000"});
+          return false;
+          }
+      });
+    });
+
+      async function reBuild(){
 
 	    categories_data = await fetchCategories('category_tbl').then(function(data){            
             data.forEach(function(index){
@@ -390,7 +431,6 @@
             return data;
       }).then(async function(categories_data){
             record_data = await fetchRecords('record_tbl').then(function(data){
-                  //console.log(data);
                   data.forEach(function(index){
                       index.link = "<a href='"+index.link+"' target='_blank'>"+(index.link.length > 50 ? index.link.slice(0, 50-1) +
                         '&hellip;' : index.link) +"</a>";
@@ -403,9 +443,9 @@
                   return data;
             });
             return {record: record_data,categories:categories_data};
-	    }).then(function(data){
-          $(document).ready( function () { 
-              const recordTable = $('#record_tbl').DataTable({
+	    }).then(function(data){          
+          $(document).ready( function () {	
+              recordTable = $('#record_tbl').DataTable({
                   "searching": true,
                   "aoColumnDefs": [
                       { "bSortable": false, "aTargets": [ 1, 5] },
@@ -509,37 +549,6 @@
               }
           });
 
-      $("#new-record-save").on("click", function(){
-            let is_validated = validateForm('#new-record-modal');
-            if(is_validated){	
-                if($("#category").val() > 0){
-                    let data = {title: $("#title").val(),
-                                  link: $("#link").val(),
-                                  category_id: $("#category").val(),
-                                  priority: $("#priority").val(),
-                                  username: $("#username").val(),
-                                  password: $("#password").val()
-                                };
-                    addRecord(data);
-                }else{
-				            let category_id = $("#category").text();
-                    addCategory(category_id).then(function(category){
-                      let data = {title: $("#title").val(),
-                                  link: $("#link").val(),
-                                  category_id: category.id,
-                                  priority: $("#priority").val(),
-                                  username: $("#username").val(),
-                                  password: $("#password").val()
-                                  };
-                        addRecord(data);
-                    });
-                }            
-            }else{
-                $("#new-record-modal-title").text("Form Validation Error").css({"color":"#ff0000"});
-                return false;
-            }
-      });
-	
       $("#withlogin").on("change", function(){
           if($(this).is(':checked')){
               $(".extra-inputs").css({"display":"block"});
@@ -554,7 +563,7 @@
 
       $("#category-new").on("blur",function(){
           if(!$(this).val()){
-              $("#category").val("").change();
+              $("#category").val("select").change();
               $("#category").attr("required", "required");
               $("#category").css({"display":"block"});
               $(this).css({"display":"none"});
@@ -564,7 +573,7 @@
       $("#category-new").on("change",function(){
 		      let categoryValue = capitalizeWord($(this).val().toLowerCase());
           if(!$(this).val()){ 
-              $("#category").val("").change();
+              $("#category").val("select").change();
               $("#category").attr("required", "required");
               $("#category").css({"display":"block"});
               $(this).css({"display":"none"});
@@ -577,7 +586,7 @@
                     }
               });
               if(!is_uniqueCategory){
-				          $("#category").append("<option value='0' selected>"+categoryValue+"</option>").change();
+				          $("#category").append("<option value='late' selected>"+categoryValue+"</option>").change();
               }
 
               $("#category").css({"display":"block"});
@@ -589,6 +598,10 @@
 	  }) // end document.ready
 
   }); //end .then load
+
+}
+
+reBuild();
 
   function validateForm(scope){
       let error_count=0;
