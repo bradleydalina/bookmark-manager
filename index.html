@@ -322,7 +322,7 @@
 
       async function fetchCategories(table) {
           try{
-              const { data, error } = await supabase.from(table).select(`id, title`);
+              const { data, error } = await supabase.from(table).select(`id, title, created_at`);
               //console.log(error);
               if(error) throw error;
               return data;
@@ -380,18 +380,15 @@
           }
       }
 
-	    categories_data = await fetchCategories('category_tbl').then(function(data){
-            //console.log(data);
+	    categories_data = await fetchCategories('category_tbl').then(function(data){            
             data.forEach(function(index){
-                  index.created_at = new Date(index.created_at).toLocaleDateString('en-us', { weekday:"long", year:"numeric",
-                  month:"long", day:"numeric"});
+                  index.created_at = new Date(index.created_at).toLocaleDateString('en-us', { weekday:"long", year:"numeric", month:"long", day:"numeric"});
                   index.action="<button data-toggle='modal' data-target='#view-record-modal' class='action-btn view-record-btn btn btn-sm btn-light' data-toggle='tooltip' data-placement='top' title='View' id='' data=''><i class='fa fa-eye'></i></button>";
                   index.title = capitalizeWord(index.title);
                   return index;
             })
             return data;
-      }).then(async function(){
-
+      }).then(async function(categories_data){
             record_data = await fetchRecords('record_tbl').then(function(data){
                   //console.log(data);
                   data.forEach(function(index){
@@ -405,14 +402,15 @@
                   })
                   return data;
             });
-	    }).then(function(){
+            return {record: record_data,categories:categories_data};
+	    }).then(function(data){
           $(document).ready( function () { 
               const recordTable = $('#record_tbl').DataTable({
                   "searching": true,
                   "aoColumnDefs": [
                       { "bSortable": false, "aTargets": [ 1, 5] },
                   ],
-                  data: record_data,
+                  data: data.record,
                   "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
                   "order": [[ 2, "asc" ], [3, "desc"]],
                   "autoWidth": true,
@@ -477,7 +475,7 @@
                       });
                     });
           }
-		      reDrawRecordTable(record_data);
+		      reDrawRecordTable(data.record);
 
           $(".form-control").on("change input blur", function(){
               $(this).css({"borderColor":"#1d1d1d77"});
@@ -485,8 +483,8 @@
 
           $(document).on('shown.bs.modal', "#new-record-modal", function (e) {
               $("#category").empty().append('<option value="">Select</option><option value="add-new">Add new</option>');
-              if(categories_data){
-                categories_data.forEach(function(index){
+              if(data.categories){                
+				          data.categories.forEach(function(index){
                     $("#category").append('<option value="'+index.id+'">'+index.title+'</option>');
                 });
               }
