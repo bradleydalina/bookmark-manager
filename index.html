@@ -253,13 +253,13 @@
         <div class="modal-header">
 		      <button style="position: absolute; right: 20px; top: 15px;" type="button" class="btn-close" data-bs-dismiss="modal"><span class="sr-only">Close</span></button>
           <h4 id="new-record-modal-title" class="modal-title fs-5" data-title="Add new user">Add new user</h4>
-          <small class="modal-message font-bold" data-message="Please enter the following input fields.">Please enter the following input
+          <small id="new-record-modal-message" class="modal-message font-bold" data-message="Please enter the following input fields.">Please enter the following input
 		                        fields.</small>
         </div>
         <div class="modal-body">
           <div class="mb-3">
             <label for="title" class="form-label">Title <span class="title-error text-danger fst-italic"></span></label>
-            <input type="text" class="form-control" id="title" placeholder="Bookmark title" required>
+            <input type="text" class="form-control" id="title" placeholder="Bookmark title" required autocomplete="on">
           </div>
           <div class="mb-3">
             <label for="link" class="form-label">Link <span class="link-error text-danger fst-italic">(https://)</span></label>
@@ -304,7 +304,7 @@
             </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-light btn-flat" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-light btn-flat" id="new-record-close" data-bs-dismiss="modal">Close</button>
           <button type="button" class="btn btn-secondary btn-flat" id="new-record-save">Save record</button>
         </div>
       </div>
@@ -312,145 +312,314 @@
   </div>
 	<script type="module">
       'use_strict';
-      import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-      const supabaseUrl = 'https://zuupkqewxaxdwepasuai.supabase.co'
-      const supabase = createClient(supabaseUrl, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1dXBrcWV3eGF4ZHdlcGFzdWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTg3NjM1ODksImV4cCI6MjAzNDMzOTU4OX0.icXtvncapWLxHYdVz94aaefetE73vNmBnJqBabDLOhU')
+	    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';	
+      const supabaseUrl = 'https://zuupkqewxaxdwepasuai.supabase.co';
+      const supabase = createClient(supabaseUrl,
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1dXBrcWV3eGF4ZHdlcGFzdWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTg3NjM1ODksImV4cCI6MjAzNDMzOTU4OX0.icXtvncapWLxHYdVz94aaefetE73vNmBnJqBabDLOhU');
+      
+      var record_data = [];
+      var categories_data= [];
 
-      // console.log('Supabase Instance: ', supabase)
+      async function fetchCategories(table) {
+          try{
+              const { data, error } = await supabase.from(table).select(`id, title`);
+              //console.log(error);
+              if(error) throw error;
+              return data;
+          } catch (error) {
+              return [];
+          }
+      }
+	
+      async function fetchRecords(table) {
+          try{
+              const { data, error } = await supabase.from(table).select(`id, title, link, priority, created_at,
+              category_tbl:category_id(title)`);
+              //console.log(error);
+              if(error) throw error;
+          return data;
+          } catch (error) {
+              return [];
+          }
+      }
 
-      var { data, error } = await supabase
-      .from('record_tbl')
-      .select()
-      //console.log(data);
-		$(document).ready( function () {
-      $(".form-control").on("change input blur", function(){
-          $(this).css({"borderColor":"#1d1d1d77"});
-      })
+      async function addCategory(title){
+          try {
+          let { data, error, statusText } = await supabase
+          .from('category_tbl')
+          .insert({
+              title: title //$("#category").text()
+              }).select();
+              if(error) throw error;
+              return data[0];
+              //addRecord(data[0].id);
+          } catch (error) {
+              $("#new-record-modal-title").text("Error saving the new record").css({"color":"#ff0000"});
+              $("#new-record-modal-message").text(JSON.stringify(error));              
+              return [];
+          }
+      }
+
+      async function addRecord(data){
+          try {
+              let { error, statusText } = await supabase
+              .from('record_tbl')
+              .insert(data);
+              if(error) throw error;
+              $("#new-record-modal-title").text("New bookmark record saved").css({"color":"#ff0000"});
+              
+              reDrawRecordTable(await fetchAndDrawRecordTable());
+              
+              setTimeout(function(){
+              $("#new-record-close").trigger('click');
+              }, 3000);
+          } catch (error) {
+              $("#new-record-modal-title").text("Error saving the new record").css({"color":"#ff0000"});
+              $("#new-record-modal-message").text(JSON.stringify(error));
+              return false;
+          }
+      }
+
+	    categories_data = await fetchCategories('category_tbl').then(function(data){
+            //console.log(data);
+            data.forEach(function(index){
+                  index.created_at = new Date(index.created_at).toLocaleDateString('en-us', { weekday:"long", year:"numeric",
+                  month:"long", day:"numeric"});
+                  index.action="<button data-toggle='modal' data-target='#view-record-modal' class='action-btn view-record-btn btn btn-sm btn-light' data-toggle='tooltip' data-placement='top' title='View' id='' data=''><i class='fa fa-eye'></i></button>";
+                  index.title = capitalizeWord(index.title);
+                  return index;
+            })
+            return data;
+      }).then(async function(){
+
+            record_data = await fetchRecords('record_tbl').then(function(data){
+                  //console.log(data);
+                  data.forEach(function(index){
+                      index.link = "<a href='"+index.link+"' target='_blank'>"+(index.link.length > 50 ? index.link.slice(0, 50-1) +
+                        '&hellip;' : index.link) +"</a>";
+                      index.created_at = new Date(index.created_at).toLocaleDateString('en-us', { weekday:"long", year:"numeric",
+                      month:"long", day:"numeric"});
+                      index.action="<button data-toggle='modal' data-target='#view-record-modal' class='action-btn view-record-btn btn btn-sm btn-light' data-toggle='tooltip' data-placement='top' title='View' id='' data=''><i class='fa fa-eye'></i></button>";
+                      index.category = capitalizeWord(index.category_tbl.title);
+                      return index;
+                  })
+                  return data;
+            });
+	    }).then(function(){
+          $(document).ready( function () { 
+              const recordTable = $('#record_tbl').DataTable({
+                  "searching": true,
+                  "aoColumnDefs": [
+                      { "bSortable": false, "aTargets": [ 1, 5] },
+                  ],
+                  data: record_data,
+                  "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+                  "order": [[ 2, "asc" ], [3, "desc"]],
+                  "autoWidth": true,
+                  "responsive": true,
+                  columns:[
+                      { data: 'title', className: 'dt-expand'},
+                      { data: 'link' ,className: 'dt-expand'},
+                      { data: 'category' ,className: 'dt-expand'},
+                      { data: 'priority' ,className: 'dt-expand'},
+                      { data: 'created_at' ,className: 'dt-expand'},
+                      { data: 'action'},
+                  ]
+              });
+          function reDrawRecordTable(record_data){
+              $("#category-filter").remove();
+              $("#priority-filter").remove();
+              $(".dt-search").append(" <select id='category-filter' class='dt-input'><option>Select...</option></select>");
+              $(".dt-search").append(" <select id='priority-filter' class='dt-input'><option>Select...</option></select>");
+
+                    recordTable.clear().rows.add(record_data).draw();
+                    recordTable.columns("2").every(function () {
+                      var column = this;
+                      //console.log(column);
+                      let select = $('#category-filter').on('change', function () {
+                          if($(this).val().length > 0 && $(this).val()!='Select...'){
+                              var val = $.fn.dataTable.util.escapeRegex($('option:selected',this).text());
+                              column.search(val ? '^' + val + '$' : '', true, false).draw();//
+                          }else{
+                              column.search('').draw();
+                          }
+                      });
+                      select.find('option').not(':first').remove();
+                      column
+                      .data()
+                      .unique()
+                      .order([2, 'desc'])
+                      // .sort()
+                      .each(function (d, j) {
+                          select.append('<option value="' + d + '">' + d + '</option>');
+                      });
+                    });
+
+                    recordTable.columns("3").every(function () {
+                      var column = this;
+                      //console.log(column);
+                      let select = $('#priority-filter').on('change', function () {
+                          if($(this).val().length > 0 && $(this).val()!='Select...'){
+                              var val = $.fn.dataTable.util.escapeRegex($('option:selected',this).text());
+                              column.search(val ? '^' + val + '$' : '', true, false).draw();//
+                          }else{
+                              column.search('').draw();
+                          }
+                      });
+                      select.find('option').not(':first').remove();
+                      column
+                      .data()
+                      .unique()
+                      .order([3, 'asc'])
+                      .sort()
+                      .each(function (d, j) {
+                          select.append('<option value="' + d + '">' + d + '</option>');
+                      });
+                    });
+          }
+		      reDrawRecordTable(record_data);
+
+          $(".form-control").on("change input blur", function(){
+              $(this).css({"borderColor":"#1d1d1d77"});
+          });
+
+          $(document).on('shown.bs.modal', "#new-record-modal", function (e) {
+              $("#category").empty().append('<option value="">Select</option><option value="add-new">Add new</option>');
+              if(categories_data){
+                categories_data.forEach(function(index){
+                    $("#category").append('<option value="'+index.id+'">'+index.title+'</option>');
+                });
+              }
+              $("#title").focus();
+          });
+    
+          $("#category").on("change", function(){
+              if($(this).val()=='add-new'){
+                  $(this).css({"display":"none"});
+                  
+                  $("#category-new").css({"display":"block"});
+                  $("#category-new").val('').focus();
+              }
+          });
+
+          $(".show-hide-password").on("click", function(){
+              let input = $(this).parents(".input-group").children("input");
+              if(input.attr("type")=="password"){
+                  input.attr("type", "text");
+              }else{
+                  input.attr("type", "password");
+              }
+          });
 
       $("#new-record-save").on("click", function(){
             let is_validated = validateForm('#new-record-modal');
-            if(is_validated){
-                //console.log('Form Validated');
-                //$("#new-record-modal-title")
-                let { error } = await supabase
-                .from('record_tbl')
-                .insert({ 
-                    title: $("#title").val(), 
-                    link: $("#link").val(),
-                    category: $("#category").val(),
-                    priority: $("#priority").val(),
-                    username: $("#username").val(),
-                    password: $("#password").val()
-                }); 
+            if(is_validated){	
+                if($("#category").val() > 0){
+                    let data = {title: $("#title").val(),
+                                  link: $("#link").val(),
+                                  category_id: $("#category").val(),
+                                  priority: $("#priority").val(),
+                                  username: $("#username").val(),
+                                  password: $("#password").val()
+                                };
+                    addRecord(data);
+                }else{
+				            let category_id = $("#category").text();
+                    addCategory(category_id).then(function(category){
+                      let data = {title: $("#title").val(),
+                                  link: $("#link").val(),
+                                  category_id: category.id,
+                                  priority: $("#priority").val(),
+                                  username: $("#username").val(),
+                                  password: $("#password").val()
+                                  };
+                        addRecord(data);
+                    });
+                }            
             }else{
-				        $("#new-record-modal-title").text("Form Validation Error").css({"color":"#ff0000"});
-                return;
+                $("#new-record-modal-title").text("Form Validation Error").css({"color":"#ff0000"});
+                return false;
             }
       });
-
-      $("#category").on("change", function(){
-          if($(this, 'option:selected').val()=='add-new'){
-			      $(this).css({"display":"none"});
-
-            $("#category-new").css({"display":"block"});
-			      $("#category-new").focus();
-          }
-      });
-
-      $(".show-hide-password").on("click", function(){
-          let input = $(this).parents(".input-group").children("input");
-          if(input.attr("type")=="password"){
-			          input.attr("type", "text");
-          }else{
-			        input.attr("type", "password");
-          }
-      });
-
+	
       $("#withlogin").on("change", function(){
           if($(this).is(':checked')){
               $(".extra-inputs").css({"display":"block"});
               $("#username").attr("required", "required");
-			        $("#password").attr("required", "required");
+              $("#password").attr("required", "required");
           }else{
-			        $(".extra-inputs").css({"display":"none"});
+              $(".extra-inputs").css({"display":"none"});
               $("#username").removeAttr("required");
               $("#password").removeAttr("required");
           }
       });
 
-	    $("#category-new").on("change blur",function(){
-        if($(this).val()){          
-		      
-		      $("#category").css({"display":"block"});
-			    $(this).css({"display":"none"});
-          let option = $(this).val().toLowerCase();
-          $("#category option[value='"+option+"']").remove();
-          $("#category").append("<option value='"+$(this).val().toLowerCase()+"' selected>"+capitalizeWord($(this).val().toLowerCase())+"</option>");
+      $("#category-new").on("blur",function(){
+          if(!$(this).val()){
+              $("#category").val("").change();
+              $("#category").attr("required", "required");
+              $("#category").css({"display":"block"});
+              $(this).css({"display":"none"});
+          }
+      });
 
-		      $("#category").attr("required", "required").change();
-        }else{
-			      $("#category").val("").change();
-			      $("#category").attr("required", "required");
-            $("#category").css({"display":"block"});
-            $(this).css({"display":"none"});
-        }
+      $("#category-new").on("change",function(){
+		      let categoryValue = capitalizeWord($(this).val().toLowerCase());
+          if(!$(this).val()){ 
+              $("#category").val("").change();
+              $("#category").attr("required", "required");
+              $("#category").css({"display":"block"});
+              $(this).css({"display":"none"});
+          }else{
+              let is_uniqueCategory = false;
+             $("#category option").each(function(){
+                    if($(this).text() == categoryValue){
+					              is_uniqueCategory = true;
+						            $(this).prop('selected', true).change();
+                    }
+              });
+              if(!is_uniqueCategory){
+				          $("#category").append("<option value='0' selected>"+categoryValue+"</option>").change();
+              }
+
+              $("#category").css({"display":"block"});
+			        $("#category-new").css({"display":"none"});
+              $("#category").attr("required", "required");
+          }
       })
 
+	  }) // end document.ready
 
-	    const recordTable = $('#record_tbl').DataTable({
-        "searching": true,
-        "aoColumnDefs": [
-          { "bSortable": false, "aTargets": [ 1, 5] },
-        ], 
-        data: data,
-        "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
-        "order": [[ 2, "asc" ], [3, "desc"]],
-        "autoWidth": true,
-		    "responsive": true, 
-        columns:[
-        { data: 'title', className: 'dt-expand'},
-        { data: 'link' ,className: 'dt-expand'},
-        { data: 'category' ,className: 'dt-expand'},
-        { data: 'created_at' ,className: 'dt-expand'},
-	    	{ data: 'priority' ,className: 'dt-expand'},
-        { data: 'action'},
-        ],
-        drawCallback: function (settings) {
-			    $(".dt-search").append(" <select id='category-filter' class='dt-input'><option>Select...</option></select>");
-		      $(".dt-search").append(" <select id='priority-filter' class='dt-input'><option>Select...</option></select>");
-          }
-    });
-	});
+  }); //end .then load
 
   function validateForm(scope){
       let error_count=0;
       $(scope).find(".form-control").each(function(index){
           let attr = $(this).attr('required');
-		      //console.log($(this).prop("tagName").toLowerCase());
+          //console.log($(this).prop("tagName").toLowerCase());
           //console.log($(this).val());
           if(typeof attr !== 'undefined' && attr !== false){
               if(!$(this).val() && ['input', 'textarea'].includes($(this).prop("tagName").toLowerCase()) ){
-				        if(error_count == 0){
-					        $(this).focus();
+                if(error_count == 0){
+                  $(this).focus();
                 }
-				        $(this).parent('div').find('label > span').text('(Field is required)');
+                $(this).parent('div').find('label > span').text('(Field is required)');
                 $(this).css("border","solid 1px #ff0000");
-				        error_count++;
+                error_count++;
               }else if($(this).prop("tagName").toLowerCase()=='select' && !$(this, 'option:selected').val()){
                   if(error_count == 0){
                   $(this).focus();
                   }
                   $(this).css("border","solid 1px #ff0000");
-				          $(this).parent('div').find('label > span').text('(Field is required)');
+                  $(this).parent('div').find('label > span').text('(Field is required)');
                   error_count++;
               }
           }
-      });
-      
+      });      
       return error_count>0 ? false : true;
   }
   function capitalizeWord(str){
-	    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+      return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
   }
 	</script>
 </body>
