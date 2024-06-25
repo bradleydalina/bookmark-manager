@@ -286,7 +286,13 @@
             <div class="col-md-12">
 						<h3 class="mt-3">Bookmark Manager</h3>
             <p>My personal bookmark collection.</p>
-			<a id="google-login" href="javascript:void(0);" role="button" class="btn btn-light mt-3"><!--{{url('auth/google')}}-->
+            <div id="g_id_onload" data-client_id="609090122162-fs7c9roenejdal5ksa0mfs3sfmls9k3b.apps.googleusercontent.com" data-context="signin" data-ux_mode="popup"
+              data-callback="handleSignInWithGoogle" data-nonce="" data-auto_select="true" data-itp_support="true"
+              data-use_fedcm_for_prompt="true"></div>
+            
+            <div class="g_id_signin" data-type="standard" data-shape="pill" data-theme="outline" data-text="signin_with"
+              data-size="large" data-logo_alignment="left"></div>
+			<!--<a id="google-login" href="javascript:void(0);" role="button" class="btn btn-light mt-3">{{url('auth/google')}}
 				<div class="nsm7Bb-HzV7m-LgbsSe-bN97Pc-sM5MNb ">
                   <div class="nsm7Bb-HzV7m-LgbsSe-Bz112c"><svg version="1.1" xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 48 48" class="LgbsSe-Bz112c">
@@ -308,7 +314,7 @@
                     </svg></div>
                   <span class="nsm7Bb-HzV7m-LgbsSe-BPrWId">Sign in with Google</span><span class="L6cTce" id="button-label">Sign in with Google</span>
                 </div>
-              </a>
+              </a>-->
               </div>
 					</div>
 				</div>
@@ -322,13 +328,43 @@
 		const supabaseUrl = 'https://zuupkqewxaxdwepasuai.supabase.co';
 		const supabase = createClient(supabaseUrl,
 		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1dXBrcWV3eGF4ZHdlcGFzdWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTg3NjM1ODksImV4cCI6MjAzNDMzOTU4OX0.icXtvncapWLxHYdVz94aaefetE73vNmBnJqBabDLOhU');
+      
+        $(document).ready(function(){
 
-    async function gLogin(){
+            const nonce = btoa(
+            String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))),
+            );
+            
+            const encoder = new TextEncoder();
+            const encodedNonce = encoder.encode(nonce);
+
+              crypto.subtle.digest("SHA-256", encodedNonce).then((hashBuffer) => {
+              const hashArray = Array.from(new Uint8Array(hashBuffer));
+              const hashedNonce = hashArray
+              .map((b) => b.toString(16).padStart(2, "0"))
+              .join("");
+              return hashedNonce;
+            }).then((gnonce)=> {
+				        $("#g_id_onload").attr("data-nonce", gnonce);
+            });
+
+            async function handleSignInWithGoogle(response) {
+                const { data, error } = await supabase.auth.signInWithIdToken({
+                provider: 'google',
+                token: response.credential,
+                nonce: nonce,
+                })
+            }
+			      
+        });
+       
+        
+    /*async function gLogin(){
         try{
           const { data, error } = await supabase.auth.signInWithOAuth({
               provider:'google',
               options: {
-              redirectTo: `http://dalina.eu.org/bookmark-manager/`,
+                  redirectTo: `http://dalina.eu.org/bookmark-manager/`,
               },
           })
           console.log(data);
@@ -342,7 +378,7 @@
       $("#google-login").on("click", function(){
 		      gLogin();
 		  })
-	  })
+	  })*/
 	</script>
 </body>
 
