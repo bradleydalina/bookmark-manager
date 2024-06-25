@@ -286,7 +286,7 @@
             <div class="col-md-12">
 						<h3 class="mt-3">Bookmark Manager</h3>
             <p>My personal bookmark collection.</p>
-			<a href="{{url('auth/google')}}" role="button" class="btn btn-light mt-3">
+			<a id="google-login" href="javascript:void(0);" role="button" class="btn btn-light mt-3"><!--{{url('auth/google')}}-->
 				<div class="nsm7Bb-HzV7m-LgbsSe-bN97Pc-sM5MNb ">
                   <div class="nsm7Bb-HzV7m-LgbsSe-Bz112c"><svg version="1.1" xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 48 48" class="LgbsSe-Bz112c">
@@ -322,27 +322,23 @@
 		const supabaseUrl = 'https://zuupkqewxaxdwepasuai.supabase.co';
 		const supabase = createClient(supabaseUrl,
 		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1dXBrcWV3eGF4ZHdlcGFzdWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTg3NjM1ODksImV4cCI6MjAzNDMzOTU4OX0.icXtvncapWLxHYdVz94aaefetE73vNmBnJqBabDLOhU');
-	
-		      supabase.auth.signInWithOAuth({
-		          provider: 'google',
-		      });
-		
-		      try{
-		          const { data, error } = await supabase.auth.signInWithOAuth({
-		              provider,
-		              options: {
-		                  redirectTo: `http://dalina.eu.org/bookmark-manager/`,
-		              },
-		          })
-				      console.log(data);
-		          if(error) throw error;
-		      } catch (error) {
-		          console.log(error);
-		      }
-		
-		      if (data.url) {
-		          redirect(data.url) // use the redirect API for your server framework
-		      }
+
+    $(document).ready(function(){
+      $("#google-login").on("click", function(){
+        try{
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider:'google',
+                options: {
+                    redirectTo: `http://dalina.eu.org/bookmark-manager/`,
+                },
+            })
+            console.log(data);
+            if(error) throw error;
+        } catch (error) {
+            console.log(error);
+        }
+		  })
+	  })
 	</script>
 </body>
 
