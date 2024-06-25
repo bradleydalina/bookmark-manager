@@ -323,28 +323,26 @@
 		const supabase = createClient(supabaseUrl,
 		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1dXBrcWV3eGF4ZHdlcGFzdWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTg3NjM1ODksImV4cCI6MjAzNDMzOTU4OX0.icXtvncapWLxHYdVz94aaefetE73vNmBnJqBabDLOhU');
 	
-      supabase.auth.signInWithOAuth({
-          provider: 'google',
-      });
-
-/*await supabase.auth.signInWithOAuth({
-provider,
-options: {
-redirectTo: `http://example.com/auth/callback`,
-},
-})
-
-
-const { data, error } = await supabase.auth.signInWithOAuth({
-provider,
-options: {
-redirectTo: 'http://example.com/auth/callback',
-},
-})
-
-if (data.url) {
-redirect(data.url) // use the redirect API for your server framework
-}*/
+		      supabase.auth.signInWithOAuth({
+		          provider: 'google',
+		      });
+		
+		      try{
+		          const { data, error } = await supabase.auth.signInWithOAuth({
+		              provider,
+		              options: {
+		                  redirectTo: `http://dalina.eu.org/bookmark-manager/`,
+		              },
+		          })
+				      console.log(data);
+		          if(error) throw error;
+		      } catch (error) {
+		          console.log(error);
+		      }
+		
+		      if (data.url) {
+		          redirect(data.url) // use the redirect API for your server framework
+		      }
 	</script>
 </body>
 
