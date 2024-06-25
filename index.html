@@ -321,7 +321,7 @@
 			</td>
 		</tr>
 	</table>
-	<script src="https://accounts.google.com/gsi/client" async></script>
+	<script src="https://accounts.google.com/gsi/client" async defer></script>
 	<script type="module">
 		'use_strict';
 		import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
@@ -347,8 +347,11 @@
             }).then((gnonce)=> {
 				        $("#g_id_onload").attr("data-nonce", gnonce);
             });
+            function handleSignInWithGoogle(){
+              
+            }
 
-            async function handleSignInWithGoogle(response) {
+            window.handleSignInWithGoogle = async(response)=> {
                 const { data, error } = await supabase.auth.signInWithIdToken({
                 provider: 'google',
                 token: response.credential,
@@ -357,8 +360,7 @@
             }
 			      
         });
-       
-        
+
     /*async function gLogin(){
         try{
           const { data, error } = await supabase.auth.signInWithOAuth({
