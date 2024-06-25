@@ -323,20 +323,24 @@
 		const supabase = createClient(supabaseUrl,
 		'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1dXBrcWV3eGF4ZHdlcGFzdWFpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTg3NjM1ODksImV4cCI6MjAzNDMzOTU4OX0.icXtvncapWLxHYdVz94aaefetE73vNmBnJqBabDLOhU');
 
-    $(document).ready(function(){
-      $("#google-login").on("click", function(){
+    async function gLogin(){
         try{
-            const { data, error } = await supabase.auth.signInWithOAuth({
-                provider:'google',
-                options: {
-                    redirectTo: `http://dalina.eu.org/bookmark-manager/`,
-                },
-            })
-            console.log(data);
-            if(error) throw error;
+          const { data, error } = await supabase.auth.signInWithOAuth({
+              provider:'google',
+              options: {
+              redirectTo: `http://dalina.eu.org/bookmark-manager/`,
+              },
+          })
+          console.log(data);
+          if(error) throw error;
         } catch (error) {
             console.log(error);
         }
+    }
+
+    $(document).ready(function(){
+      $("#google-login").on("click", function(){
+		      gLogin();
 		  })
 	  })
 	</script>
